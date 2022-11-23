@@ -1,4 +1,4 @@
-# 🛒 E-commerce Company
+# 👨🏼‍⚕️ Predictors of Mental Health Illness
 
 
  <img src="https://user-images.githubusercontent.com/101379141/201035143-6f1af4fe-4169-4074-8287-6790d88803db.png" alt="Image" width="350" height="160">  
@@ -7,7 +7,7 @@
 
 # :books: Table of Contents <!-- omit in toc -->
 
-- [:briefcase: Business Case and Requirement](#briefcase-business-case-and-requirement)
+- [:briefcase: Case Study and Requirement](#briefcase-business-case-and-requirement)
 - [:bookmark_tabs:Example Datasets](#bookmark_tabsexample-datasets)
 - [A. Data Exploration and Cleansing](#a-data-exploration-and-cleansing)
 - [B. Analysis](#b-analysis)
@@ -16,35 +16,46 @@
 
 ---
 
-# :briefcase: Business Case and Requirement
+# Case Study and Requirement
 
+This dataset is from a 2014 survey that measures attitudes towards mental health and frequency of mental health disorders in the tech workplace.
 
-You are a Data Analyst working for an e-commerce company named X. You are tasked with preparing a presentation to present an overview of the company's business and operations to date for Sales and Operations Managers. 
-
-❔ The presentation should include at a minimum the following information: 
-- Business overview. 
-- Customer satisfaction.  
-- 2 to 3 areas of recommendation (areas) where the company can improve.
-
-➕ Some additional information for the case study:
-- Since there is only data up to 2018, we will assume that it is currently September 2018 (data after September 2018 you can ignore).
-- The company is based in the US, but incorporated in Brazil (that's why some information is written in Portuguese).
-
+### ❓ Question
+Can you predict whether a patient should be treated of his/her mental illness or not according to the values obtained in the dataset?
 
 ---
 
 # :bookmark_tabs:Example Datasets
 
 ### ✔ Orders dataset
-Provide information about orders
-- order_id: unique ID of the order
-- customer_id: unique ID of the customer
-- order_status: order status
-- order_purchase_timestamp: time when the order was ordered
-- order_approved_at: time the order is approved
-- order_delivered_carrier_date: the time the item was delivered to the carrier
-- order_delivered_customer_date: the time the item was delivered to the customer
-- order_estimated_delivery_date: the estimated time the order will be delivered to the customer
+
+- Timestamp
+- Age
+- Gender
+- Country
+- state: If you live in the United States, which state or territory do you live in?
+- self_employed: Are you self-employed?
+- family_history: Do you have a family history of mental illness?
+- treatment: Have you sought treatment for a mental health condition?
+- work_interfere: If you have a mental health condition, do you feel that it interferes with your work?
+- no_employees: How many employees does your company or organization have?
+- remote_work: Do you work remotely (outside of an office) at least 50% of the time?
+- tech_company: Is your employer primarily a tech company/organization?
+- benefits: Does your employer provide mental health benefits?
+- care_options: Do you know the options for mental health care your employer provides?
+- wellness_program: Has your employer ever discussed mental health as part of an employee wellness program?
+- seek_help: Does your employer provide resources to learn more about mental health issues and how to seek help?
+- anonymity: Is your anonymity protected if you choose to take advantage of mental health or substance abuse treatment resources?
+- leave: How easy is it for you to take medical leave for a mental health condition?
+- mentalhealthconsequence: Do you think that discussing a mental health issue with your employer would have negative consequences?
+- physhealthconsequence: Do you think that discussing a physical health issue with your employer would have negative consequences?
+- coworkers: Would you be willing to discuss a mental health issue with your coworkers?
+- supervisor: Would you be willing to discuss a mental health issue with your direct supervisor(s)?
+- mentalhealthinterview: Would you bring up a mental health issue with a potential employer in an interview?
+- physhealthinterview: Would you bring up a physical health issue with a potential employer in an interview?
+- mentalvsphysical: Do you feel that your employer takes mental health as seriously as physical health?
+- obs_consequence: Have you heard of or observed negative consequences for coworkers with mental health conditions in your workplace?
+- comments: Any additional notes or comments
 
 <details><summary> 👆🏼 Click to expand Orders Dataset </summary>
 
@@ -55,18 +66,18 @@ Provide information about orders
 <div align="center">
 First 10 rows
 
-|order_id|customer_id|order_status|order_purchase_timestamp|order_approved_at|order_delivered_carrier_date|order_delivered_customer_date|order_estimated_delivery_date|
-|:----|:-----|:----|:----|:----|:----|:----|:----|
-e481f51cbdc54678b7cc49136f2d6af7|	9ef432eb6251297304e76186b10a928d|	delivered|	10/2/2017 10:56|10/2/2017 11:07|	10/4/2017 19:55|	10/10/2017 21:25|	10/18/2017|
-53cdb2fc8bc7dce0b6741e2150273451|	b0830fb4747a6c6d20dea0b8c802d7ef|	delivered|	7/24/2018 20:41|	7/26/2018 3:24|	7/26/2018 14:31|	8/7/2018 15:27|	8/13/2018|
-47770eb9100c2d0c44946d9cf07ec65d|	41ce2a54c0b03bf3443c3d931a367089|	delivered|	8/8/2018 8:38|	8/8/2018 8:55|	8/8/2018 13:50|	8/17/2018 18:06|	9/4/2018|
-949d5b44dbf5de918fe9c16f97b45f8a|	f88197465ea7920adcdbec7375364d82|	delivered|	11/18/2017 19:28|	11/18/2017 19:45|	11/22/2017 13:39|	12/2/2017 0:28|	12/15/2017|
-ad21c59c0840e6cb83a9ceb5573f8159|	8ab97904e6daea8866dbdbc4fb7aad2c|	delivered|	2/13/2018 21:18|	2/13/2018 22:20|	2/14/2018 19:46|	2/16/2018 18:17	|2/26/2018|
-a4591c265e18cb1dcee52889e2d8acc3|	503740e9ca751ccdda7ba28e9ab8f608|	delivered|	7/9/2017 21:57|	7/9/2017 22:10|	7/11/2017 14:58|	7/26/2017 10:57|	8/1/2017|
-136cce7faa42fdb2cefd53fdc79a6098|	ed0271e0b7da060a393796590e7b737a|	invoiced|	4/11/2017 12:22|	4/13/2017 13:25|||			|5/9/2017|
-6514b8ad8028c9f2cc2374ded245783f|	9bdf08b4b3b52b5526ff42d37d47f222|	delivered|	5/16/2017 13:10|	5/16/2017 13:22|	5/22/2017 10:07|	5/26/2017 12:55|	6/7/2017|
-76c6e866289321a7c93b82b54852dc33|	f54a9f0e6b351c431402b8461ea51999|	delivered|	1/23/2017 18:29|	1/25/2017 2:50|	1/26/2017 14:16|	2/2/2017 14:08|	3/6/2017|
-e69bfb5eb88e0ed6a785585b27e16dbf|	31ad1d1b63eb9962463f764d4e6e0c9d|	delivered|	7/29/2017 11:55|	7/29/2017 12:05|	8/10/2017 19:45|	8/16/2017 17:14|	8/23/2017|
+|Timestamp|Age|	Gender|	Country|	state|	self_employed|	family_history|	treatment|	work_interfere|	no_employees|	remote_work|	tech_company|	benefits|	care_options|	wellness_program|	seek_help|	anonymity|	leave|	mental_health_consequence|	phys_health_consequence|	coworkers|	supervisor|	mental_health_interview|	phys_health_interview|	mental_vs_physical|	obs_consequence|	comments|
+|:----|:-----|:----|:----|:----|:----|:----|:----|:----|:-----|:----|:----|:----|:----|:----|:----|:----|:-----|:----|:----|:----|:----|:----|:----|:----|:----|:----|
+2014-08-27 11:29:31|	37|	Female|	United States|	IL|	NA|	No|	Yes|	Often|	6-25|	No|	Yes|	Yes|	Not sure|	No|	Yes|	Yes|	Somewhat easy|	No|	No|	Some of them|	Yes|	No|	Maybe|	Yes|	No|	NA|
+2014-08-27 11:29:37|	44|	M|	United States|	IN|	NA|	No|	No|	Rarely|	More than 1000|	No|	No|	Don't know|	No|	Don't know|	Don't know|	Don't know|	Don't know|	Maybe|	No|	No|	No|	No|	No|	Don't know|	No|	NA|
+2014-08-27 11:29:44|	32|	Male|	Canada|	NA|	NA|	No|	No|	Rarely|	6-25|	No|	Yes|	No|	No|	No|	No|	Don't know|	Somewhat difficult|	No|	No|	Yes|	Yes|	Yes|	Yes|	No|	No|	NA|
+2014-08-27 11:29:46|	31|	Male|	United Kingdom|	NA	|NA	|Yes	|Yes	|Often	|26-100	|No	|Yes	|No	|Yes	|No	|No	|No	|Somewhat difficult	|Yes	|Yes	|Some of them	|No	|Maybe	|Maybe	|No	|Yes	|NA|
+2014-08-27 11:30:22|	31|	Male|	United States|	TX	|NA|	No|	No|	Never|	100-500|	Yes|	Yes|	Yes|	No|	Don't know|	Don't know|	Don't know|	Don't know|	No|	No|	Some of them|	Yes	|Yes	|Yes	|Don't know	|No	|NA|
+2014-08-27 11:31:22|	33|	Male|	United States|	TN|	NA|	Yes|	No|	Sometimes|	6-25|	No|	Yes|	Yes|	Not sure|	No|	Don't know|	Don't know|	Don't know|	No|	No|	Yes|	Yes|	No|	Maybe|	Don't know	|No|	NA|
+2014-08-27 11:31:50|	35|	Female|	United States|	MI|	NA|	Yes|	Yes|	Sometimes|	1-5|	Yes|	Yes|	No|	No|	No|	No|	No|	Somewhat difficult|	Maybe|	Maybe|	Some of them|	No|	No|	No|	Don't know|	No|	NA|
+2014-08-27 11:32:05|	39|	M|	Canada|	NA|	NA|	No|	No|	Never|	1-5|	Yes|	Yes|	No|	Yes|	No|	No	|Yes|	Don't know|	No|	No|	No|	No|	No|	No|	No|	No|	NA|
+2014-08-27 11:32:39|	42|	Female|	United States|	IL	|NA	|Yes	|Yes	|Sometimes	|100-500	|No	|Yes	|Yes	|Yes	|No	|No	|No	|Very difficult	|Maybe	|No	|Yes	|Yes	|No	|Maybe	|No	|No	|NA|
+2014-08-27 11:32:43|	23|	Male|	Canada|	NA|	NA|	No|	No|	Never|	26-100|	No|	Yes|	Don't know|	No|	Don't know|	Don't know|	Don't know|	Don't know|	No|	No|	Yes|	Yes|	Maybe|	Maybe|	Yes|	No|	NA|
 
 </div>
 </div>
