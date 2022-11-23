@@ -87,13 +87,13 @@ df.describe()
 ```    
 ![image](https://user-images.githubusercontent.com/101379141/203503686-fe20ffc2-6892-4341-9040-3fff5d5b5a85.png)
 
- </details>
+</details>
 
- <details><summary> 1.2. Clean missing values </summary>  
+<details><summary> 1.2. Clean missing values </summary>  
   
 <br> We would check and clean the null values of all columns, beside that we also drop some unnecessary columns.
   
-<br> <details><summary> 1.2.a Check Null values </summary>
+<details><summary> 1.2.a Check Null values </summary>
 
  ```python
 df.isnull().sum()
@@ -173,7 +173,6 @@ df.isnull().sum()
   
 </details> 
 
-
 <details><summary> 1.3. Checking values of all columns </summary>  
 
 <br> After check values of all columns, we can see that there are some outliers in Gender and Age column 
@@ -228,10 +227,10 @@ Age_Group = pd.cut(df['Age'],bins=[17,23,30,61,100],labels=['18-22', '23-30 ','3
 df.insert(23,'Age_Group',Age_Group)
 df['Age_Group'].unique()                                                 
 ``` 
-![image](https://user-images.githubusercontent.com/101379141/203514958-99f8b983-74e6-468b-9add-8bd849857770.png)
+![image](https://user-images.githubusercontent.com/101379141/203514958-99f8b983-74e6-468b-9add-8bd849857770.png)     
                                                  
 </details> 
-
+  
 <details><summary> 1.3.b Gender Column </summary>  
 
 ```python
@@ -262,7 +261,8 @@ print(df['Gender'].unique())
 ![image](https://user-images.githubusercontent.com/101379141/203515581-7ec6c102-e6e8-413e-95eb-f5cd50487d08.png)
   
 </details> 
-
+</details> 
+</details> 
 </details> 
 
 ---
