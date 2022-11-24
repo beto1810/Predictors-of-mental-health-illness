@@ -1,7 +1,6 @@
-# 🛒 Case Study - E-commerce Company
-# A. Data Exploration and Cleansing
+# 🛒 Case Study - Predictors of mental health illness
 
-<p align="right"> Using Python - Google Colab vs Power BI </p>
+<p align="right"> Using Python - Google Colab </p>
 
 
 ## :books: Table of Contents <!-- omit in toc -->
@@ -58,7 +57,7 @@ df = pd.read_csv('/content/ex1.csv')
   
 </details>
 
-### 🔎 1. Explore Data Analysis
+### 🔎 1️⃣ Explore Data Analysis
 
 - There are 3 things that i would to do in this step:
   - The overall info 
@@ -267,84 +266,77 @@ print(df['Gender'].unique())
 
 ---
   
-### 2️⃣ Orders Dataset
+### 2️⃣  Preprocessing - Encoding
 
-- There are 3 things I would check in Orders dataset:
-  - Check Overall Info
-  - Transform data type of some columns from object to datatime
-  - Check Null values
+- There are 2 things I would do in this step:
+  - We encode (convert) the feature columns excluding Age column into number for model analyst.
+    - We dont encode the Age column because We grouped Age column into Age_group column and we encoded the Age_Group.
+  - Create label feature for up-comming steps
 
-<details><summary> The  Overall  </summary>
+<details><summary> Label-Enconding  </summary>
   
 ```python
-orders.head() 
-```
-![image](https://user-images.githubusercontent.com/101379141/202590328-96673499-1c64-4a7b-a446-84457184fddc.png)
+label_dict = {}
+#Label-Enconding
+le = preprocessing.LabelEncoder()
+for feature in df.columns:
+  if feature != 'Age':
+    le.fit(df[feature])
+    le_name_mapping = dict(zip(le.classes_, le.transform(le.classes_)))
+    df[feature] = le.transform(df[feature])
+    # Get labels
+    labelKey = 'label_' + feature
+    labelValue = [*le_name_mapping]
+    label_dict[labelKey] =labelValue
+  else:
+    label_dict['label_Age'] = list(df['Age'])
 
-```python
-orders.info()
 ```
-![image](https://user-images.githubusercontent.com/101379141/202590347-7419779c-917a-47c9-81c3-bc94df5c63e6.png)
+```python
+df.info()
+df.head() 
+```
+![image](https://user-images.githubusercontent.com/101379141/203689607-cac4134c-d4c6-4d42-809a-834013789ee5.png)
   
- </details>
-
-<details><summary> Transform Data Type  </summary>
+```python
+for key, value in label_dict.items():     
+    print(key, value)
+```
+![image](https://user-images.githubusercontent.com/101379141/203689659-b26ccd3c-3538-4125-8af9-d6b62cba9e5e.png)
   
-```python
-#Transforming the data type from object to datetime 
-orders['order_purchase_timestamp'] = pd.to_datetime(orders['order_purchase_timestamp'], format = '%Y-%m-%d %H:%M:%S')
-orders['order_approved_at'] = pd.to_datetime(orders['order_approved_at'], format = '%Y-%m-%d %H:%M:%S')
-orders['order_delivered_carrier_date'] = pd.to_datetime(orders['order_delivered_carrier_date'], format = '%Y-%m-%d %H:%M:%S')
-orders['order_delivered_customer_date'] = pd.to_datetime(orders['order_delivered_customer_date'], format = '%Y-%m-%d %H:%M:%S')
-orders['order_estimated_delivery_date'] = pd.to_datetime(orders['order_estimated_delivery_date'], format = '%Y-%m-%d %H:%M:%S')
-
-orders.info()
-```
-![image](https://user-images.githubusercontent.com/101379141/202590474-5722e629-b482-4c4e-8065-f1e7b2b266f6.png)
-  
-</details>
-
-<details><summary> Check Null Values </summary>
-
-```python
-#Check Null Values
-orders.isnull().sum()
-```
-
-```python
-#Check Percent of Null values. 
-# Because the null values does not accounts much of total dataset ( about 3% is max), we can ignore or drop it
-# However, The null values of these columns were also mean that the orders were not delivered to customer or carrier. So We can not drop them. 
-orders.isnull().mean() * 100
-
-```
-![image](https://user-images.githubusercontent.com/101379141/202590671-f64db3e4-4fa4-49d6-9c68-908cea61fee4.png)
-
 </details>
 
 ---
-### 3️⃣ Order Items Dataset
+### 3️⃣ Covariance Matrix.
 
-- The order items dataset is clean so we don't need to adjust it.
+- Variability comparison between categories of variables 
 
-<details><summary> The  Overall  </summary>
+--> The final result showed that The strongest relationship between target variable (treatment) and feature variable is work_interfere columns with the question (If you have a mental health condition, do you feel that it interferes with your work?) and family_history (Do you have a family history of mental illness?)
 
- ```python
- order_items.head() 
- ```
- ![image](https://user-images.githubusercontent.com/101379141/202591464-b8cd4a4a-91f9-401c-9c75-e2c33a6235e3.png)
+--> It is clear that if we work or live in an environment nearly people who has mental illness or full of job stress, we could be affected. 
 
- ```python
- order_items.describe() 
- ```
- ![image](https://user-images.githubusercontent.com/101379141/202591488-d3e2293e-cd45-4865-ac51-c0e7d548658d.png)
+<details><summary> The  Code Here  </summary>
 
  ```python
- order_items.info() 
+ #correlation matrix
+corrmat = df.corr()
+f, ax = plt.subplots(figsize=(12, 9))
+sns.heatmap(corrmat, vmax=.8, square=True);
+plt.show()
  ```
- 
- ![image](https://user-images.githubusercontent.com/101379141/202591523-23610480-51e9-401c-9ca9-3b462101b617.png)
- 
+![image](https://user-images.githubusercontent.com/101379141/203692179-340350ea-3d7f-4973-9d12-7afb062831b9.png)
+
+```python
+#treatment correlation matrix
+k = 10 #number of variables for heatmap
+cols = corrmat.nlargest(k, 'treatment')['treatment'].index
+cm = np.corrcoef(df[cols].values.T)
+sns.set(font_scale=1.25)
+hm = sns.heatmap(cm, cbar=True, annot=True, square=True, fmt='.2f', annot_kws={'size': 10}, yticklabels=cols.values, xticklabels=cols.values)
+plt.show()  
+```
+![image](https://user-images.githubusercontent.com/101379141/203692256-78d617f8-6243-4fe8-8a03-3ea149154f60.png)
+
   
 </details>
  
