@@ -341,28 +341,161 @@ plt.show()
 </details>
  
 ---
-### 4️⃣ Order Payments Dataset
+### 4️⃣ Some charts to see data relationship
 
-- After The order payments dataset is clean. We don't need to adjust it.
 
-<details><summary> The  Overall  </summary>
+<details><summary> Age Group & Treatment  </summary>
 
+<br>
+  
+--> The possibility of being mental illness is increasing by age.
  ```python
- order_payments.head() 
+# Age & Treatment
+
+g = sns.FacetGrid(df, col ='treatment', height=8)
+g = g.map(sns.countplot, "Age_Group")
+
+for ax in g.axes.flat:
+    labels = ax.get_xticklabels() # get x labels
+    for i,l in enumerate(labels):
+        if(i == 0): labels[i] = '18-22'
+        elif(i ==1.0):labels[i] = '23-30'
+        elif(i ==2.0):labels[i] = '31-60'
+        elif(i ==3.0):labels[i] = '> 61'  
+    ax.set_xticklabels(labels, rotation=30) # set new labels
+plt.show()
  ```
-![image](https://user-images.githubusercontent.com/101379141/202591939-ccd8d81a-2a52-4cab-affc-efded8b4b934.png)
+![image](https://user-images.githubusercontent.com/101379141/203710998-cf9ac81f-811e-479b-97c3-912937987f7d.png)
+ 
+</details>
 
+<details><summary> Gender & Treatment  </summary> 
+<br>
+  --> Male has higher possibility of being mental illness comparing to Female.
+    
 ```python
-order_payments.info() 
-```
-![image](https://user-images.githubusercontent.com/101379141/202591974-428d8f50-9fd3-4ce2-b206-8dbbd40c60e1.png)
+#Gender & Treatment
+df1 = df
+df1['Gender'] = df1['Gender'].astype('category')
+print(df1['Gender'].unique())
+plt.figure(figsize=(12,8))
+g = sns.FacetGrid(df1, col='treatment', height=8)
+g.map(sns.countplot,'Gender')
 
+for ax in g.axes.flat:
+    labels = ax.get_xticklabels() # get x labels
+    for i,l in enumerate(labels):
+        if(i == 0): labels[i] = 'Female'
+        elif(i ==1):labels[i] = 'Male'
+        else: labels[i] ='Other'  
+    ax.set_xticklabels(labels, rotation=30) # set new labels
+plt.show()
+  
+```
+![image](https://user-images.githubusercontent.com/101379141/203714266-11193591-f268-4de4-b503-df74f5d67181.png)
+  
+</details>
+ 
+<details><summary> Percentage treatment for family_history by Gender  </summary> 
+<br>
+
+--> If your family members has experience the mental illness, people has high possibility of being mental illness too
   
 ```python
-order_payments['payment_type'].unique() 
+#Draw a catplot to show Percentage treatment for family_history by Gender
+
+g = sns.catplot(x="family_history", y="treatment", hue="Gender", data=df, kind="bar",  ci=None, size=5, aspect=2, legend_out = True)
+
+for ax in g.axes.flat:
+    labels = ax.get_xticklabels() # get x labels
+    for i,l in enumerate(labels):
+        if(i == 0): labels[i] = 'No'
+        else: labels[i] ='Yes'
+    ax.set_xticklabels(labels, rotation=30) # set new labels
+
+# title
+g._legend.set_title('Gender')
+new_labels = ['Female', 'Male', 'Other']
+# replace labels
+for t, l in zip(g._legend.texts, new_labels):
+    t.set_text(l)
+
+plt.title('Probability of health condition by family_history and Gender')
+plt.ylabel('Probability x 100')
+plt.xlabel('Family History')  
 ```
-![image](https://user-images.githubusercontent.com/101379141/202591995-81284279-97c3-49a2-a953-f3b0b3bab9cb.png)
+![image](https://user-images.githubusercontent.com/101379141/203715984-c3fa3385-2c6d-4b97-b5d5-52e845c71f83.png)
+   
+</details>
+
+<details><summary> Percentage treatment for Work_interfere by Gender  </summary> 
+<br>
+
+--> we can see that , the mental illness has negative effect to the workplace where always create the high intensity of stress.
   
+```python
+#Draw a catplot to show Percentage treatment for Work_interfere by Gender
+
+g = sns.catplot(x="work_interfere", y="treatment", hue="Gender", data=df, kind="bar",  ci=None, size=5, aspect=2, legend_out = True)
+
+for ax in g.axes.flat:
+    labels = ax.get_xticklabels() # get x labels
+    for i,l in enumerate(labels):
+        if(i == 0): labels[i] = "Don't Know" 
+        elif(i ==1):labels[i] = 'Never'
+        elif(i ==2):labels[i] = 'Often'
+        elif(i ==3):labels[i] = 'Rarely'
+        else: labels[i] = 'Sometimes'
+    ax.set_xticklabels(labels, rotation=30) # set new labels
+
+# title
+g._legend.set_title('Gender')
+new_labels = ['Female', 'Male', 'Other']
+# replace labels
+for t, l in zip(g._legend.texts, new_labels):
+    t.set_text(l)
+
+g.fig.subplots_adjust(top=1,right=0.8)
+plt.title('Probability of mental health condition')
+plt.ylabel('Probability x 100')
+plt.xlabel('work_interfere')
+```
+![image](https://user-images.githubusercontent.com/101379141/203717144-5b5fc232-6610-4744-8417-ceea7ee1c333.png)
+  
+</details>
+
+<details><summary> Percentage treatment for Care Benefit by Gender  </summary> 
+<br>
+
+--> We can't see the relationship between Care Option and Treatment clearly. 
+  
+```python
+#Draw a catplot to show Percentage treatment for Care Benefit by Gender
+
+g = sns.catplot(x="benefits", y="treatment", hue="Gender", data=df, kind="bar",  ci=None, size=5, aspect=2, legend_out = True)
+
+for ax in g.axes.flat:
+    labels = ax.get_xticklabels() # get x labels
+    for i,l in enumerate(labels):
+        if(i == 0): labels[i] = "Don't Know" 
+        elif(i ==1):labels[i] = "No"
+        else: labels[i] = "Yes"
+    ax.set_xticklabels(labels, rotation=30) # set new labels
+
+# title
+g._legend.set_title('Gender')
+new_labels = ['Female', 'Male', 'Other']
+# replace labels
+for t, l in zip(g._legend.texts, new_labels):
+    t.set_text(l)
+
+g.fig.subplots_adjust(top=1,right=0.8)
+plt.title('Probability of mental health condition')
+plt.ylabel('Probability x 100')
+plt.xlabel('Care Options')
+```
+![image](https://user-images.githubusercontent.com/101379141/203719464-08846bf2-4c5b-4eb5-95bc-64631eb67f5c.png)
+
 </details>
 
 ---
