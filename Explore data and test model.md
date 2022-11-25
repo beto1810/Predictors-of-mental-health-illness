@@ -48,6 +48,12 @@ from sklearn.model_selection import cross_val_score
 from sklearn.ensemble import BaggingClassifier, AdaBoostClassifier, GradientBoostingClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+
+from sklearn.impute import SimpleImputer
+
+#Library label encoder
+from sklearn import preprocessing
+from sklearn.preprocessing import LabelEncoder
 ```
 
 ```python
@@ -57,7 +63,8 @@ df = pd.read_csv('/content/ex1.csv')
   
 </details>
 
-### 🔎 1️⃣ Explore Data Analysis
+---
+### 1️⃣ Explore Data Analysis
 
 - There are 3 things that i would to do in this step:
   - The overall info 
@@ -499,388 +506,306 @@ plt.xlabel('Care Options')
 </details>
 
 ---
-### 5️⃣ Order Reviews Dataset
+### 5️⃣ Scaling and fitting
 
-- There are 2 things that we are doing with this dataset:
-  - The Overall
-  - Transform data type from object to datetime 
+<details><summary> Scaling  </summary> 
+<br>  
+We use MinMaxScaler instead of StandardScaler, RobustScaler because those 2 options leading scaling 'Age' to negative values , and this is disadvantage for models.  
 
-<details><summary> The  Overall  </summary>
+```python
+from sklearn.preprocessing import MinMaxScaler 
 
+scaler = MinMaxScaler ()
+df['Age'] = scaler.fit_transform(df[['Age']])
+df.head()
+```
+![image](https://user-images.githubusercontent.com/101379141/203881162-2c2df002-9ad9-4bfd-8c1f-211e9a0540c4.png)
+
+</details>
+
+<details><summary> Fitting  </summary> 
+<br>
+ 
+```python
+y = df['treatment']
+X = df.drop(columns='treatment')
+
+
+# split dataset to test and training set (75% train, 25% test)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=1)
+  
+```
+</details>
+  
+---  
+###  6️⃣Tuning
+
+<br>
+Firstly, I would write a function to evaluate the models (Confusion matrix & accuracy_score) and also applied it to Tunning Function too. 
+</br>
+
+<br>
+<details><summary> Writing Evaluate Model Function  </summary>
+  
  ```python
- order_reviews.head() 
- ```
-![image](https://user-images.githubusercontent.com/101379141/202593250-30d0b6e6-fd98-4413-98ac-93772b75b8d7.png)
   
-```python
-order_reviews.info() 
-```
-![image](https://user-images.githubusercontent.com/101379141/202593274-eb0ce20e-5c1e-4b96-8936-ed3a2d43536a.png)
+ methodDict = {} # This would be used for plotting the model's performance
+
+
+# Validation libraries
+from sklearn import metrics
+from sklearn.metrics import accuracy_score, mean_squared_error, precision_recall_curve,classification_report
+from sklearn.model_selection import cross_val_score
+
+def EvaluateModel(model, y_test, y_pred, plot=False):
+    
+    #Confusion matrix
+    # save confusion matrix and slice into four pieces
+    confusion = metrics.confusion_matrix(y_true =y_test, y_pred = y_pred)
   
-```python
-order_reviews['review_score'].value_counts()
-```
-![image](https://user-images.githubusercontent.com/101379141/202593298-38b5ceb6-5e8d-4695-93c6-8d624c479258.png)
+
+    # visualize Confusion Matrix
+    sns.heatmap(confusion,annot=True,fmt="d") 
+    plt.title('Confusion Matrix')
+    plt.xlabel('Predicted')
+    plt.ylabel('Actual')
+    plt.show()
+    
+    #Metrics computed from a confusion matrix
+    #Classification Accuracy: Overall, how often is the classifier correct?
+    accuracy = metrics.accuracy_score(y_test, y_pred)
+    print('Classification Accuracy:', accuracy)
+    
+    #Classification Error: Overall, how often is the classifier incorrect?
+    print('Classification Error:', 1 - metrics.accuracy_score(y_test, y_pred))
+    
+    #Classification Report
+    print('Classification Accuracy:' ,classification_report(y_test,y_pred))
+    
+  
+    
+    methodDict[model.__class__.__name__] = metrics.accuracy_score(y_test, y_pred) * 100
  
+ ```
+
 </details>
 
-<details><summary> Transform data type  </summary>
+<details><summary> Tunning Function </summary>
+<br>
+
+  - Because dataset is small, I still would like to use Random Search instead of Bayes, or gridsearch because I want to minimize the tuning time and better result,. In this case : I use RandomizedSearchCV .
+  
+  --> Reference to https://towardsdatascience.com/gridsearch-vs-randomizedsearch-vs-bayesiansearch-cfa76de27c6b 
 
 ```python
- order_reviews['review_creation_date'] = pd.to_datetime(order_reviews['review_creation_date'])
-order_reviews['review_answer_timestamp'] = pd.to_datetime(order_reviews['review_answer_timestamp'])
+from sklearn.model_selection import KFold
 
-order_reviews['review_creation_date'] = order_reviews.review_creation_date.dt.strftime('%m/%d/%Y')
-order_reviews['review_answer_timestamp'] = order_reviews.review_answer_timestamp.dt.strftime('%m/%d/%Y')
-order_reviews.head(5)
- ```
-  
-![image](https://user-images.githubusercontent.com/101379141/202593442-736774bf-875a-4ff0-a273-bb31b2958a31.png)
- 
-</details>
+kf = KFold(n_splits = 5, shuffle = True, random_state = 2)
+
+def RandomSearch(model, param_dist):
+  reg_bay = RandomizedSearchCV(estimator=model,
+                    param_distributions=param_dist,
+                    n_iter=20,  # search 20 times 
+                    cv=kf,
+                    n_jobs=8,
+                    scoring='accuracy',
+                    random_state =3)
+  reg_bay.fit(X_train,y_train)
+  y_pred = reg_bay.predict(X_test)
+  print('RandomSearch. Best Score: ', reg_bay.best_score_)
+  print('RandomSearch. Best Params: ', reg_bay.best_params_)
+  accuracy_score = EvaluateModel(model, y_test, y_pred, plot =True)
+
+  ```
+                                                                                      
+</details>  
+
 
 ---  
-###  6️⃣Products Dataset
+### 7️⃣ Evaluate Models
   
-- There are 3 things that we are doing with this dataset:
-  - The Overall
-  - Checking Null values .
-  - Replacing the "0 gram" of product weight to median
 
-<details><summary> The  Overall  </summary>
-  
- ```python
- products.head() 
- ```
-![image](https://user-images.githubusercontent.com/101379141/202595562-89179cb5-d1b8-4503-ac9b-908cc286c44a.png)
-  
+
+<details><summary> Logistic Regression </summary>
+
 ```python
-products.info() 
+from sklearn.linear_model import LogisticRegression
+
+logreg = LogisticRegression()
+logreg.fit(X_train, y_train)
+    
+# make class predictions for the testing set
+y_pred = logreg.predict(X_test)
+    
+print('########### Logistic Regression ###############')
+    
+accuracy_score = EvaluateModel(logreg, y_test, y_pred, plot =True)
+      
 ```
-![image](https://user-images.githubusercontent.com/101379141/202595592-4a82a95a-9136-48ed-bba7-2fa4bc89777c.png)
-
-  
-```python
-products.describe()
-``` 
-![image](https://user-images.githubusercontent.com/101379141/202595632-653f740c-1449-4279-a542-d9d506b269bf.png)
-
-```python
-# Min of product_weight_g = 0 , so we check this column to make sure there is nothing anomaly
-products[products['product_weight_g']== 0]  
-```
-  
- ![image](https://user-images.githubusercontent.com/101379141/202595685-8a7e6a1c-c51d-4c21-a6b4-779cce86637b.png)
-
-</details>
-
-<details><summary> Check Null Values </summary>
-
-```python
-  #Check Null Values
-  products.isnull().sum()
-  ```
-  ![image](https://user-images.githubusercontent.com/101379141/202596089-660af9b9-c2b1-4f9b-b894-945d6c388aba.png)
-
-
-```python  
-#Check Null values of category name column
-products[products['product_category_name'].isnull() == True]
-```
-![image](https://user-images.githubusercontent.com/101379141/202596188-5f0c384f-8126-4b1e-b4b6-fc80c8d0841b.png)
-
-```python
-#Check Null values of weight column
-products[products['product_weight_g'].isnull() == True]
-```
-  
-![image](https://user-images.githubusercontent.com/101379141/202596235-c4e5dffb-90cf-4c80-97a0-3d14e83ba554.png)  
-
- ```python
-  #Drop all 610 Null value rows , because they are not significant ( 610  rows compare to 32951 total entries )
-  products = products.dropna()  
-  products.isnull().sum()  
- ```
- ![image](https://user-images.githubusercontent.com/101379141/202596277-466fbd1b-d48b-4621-87a7-de256a357f78.png)
-                                                                                       
-</details>  
-
-<details><summary> Check product weight column </summary>
-
-  ```python
-  #Check product_weight_g distribution
-  sns.distplot(products['product_weight_g'])
-  ```
-  ![image](https://user-images.githubusercontent.com/101379141/202597280-5893fdcf-addb-40af-8b80-13b6561c8070.png)
-  
-  ```python
-  #Replace "0" values of weight to "median"
-  products['product_weight_g']= products['product_weight_g'].replace(0, products['product_weight_g'].median())  
-  ```
-  
-  ```python
-  products.describe()
-  ```
-  ![image](https://user-images.githubusercontent.com/101379141/202597233-2e49fc07-7420-4dad-98a2-39934266b62a.png)
-  
-</details>  
-
----  
-### 7️⃣ Product Name Translation Dataset
-  
-- There are 3 things that we are doing with this dataset:
-  - Checking The Overall  
-  - Merge the product name of 2 table  
-  - Checking Null values of merged table and replacing Null values by new category. 
-
-<details><summary> The Overall </summary>
-
-```python
-product_name_translation.head()
-```
-![image](https://user-images.githubusercontent.com/101379141/202599864-11041880-bf87-475b-b51e-2fb433797183.png)
-
-```python
-product_name_translation.info()
-```
-  
-![image](https://user-images.githubusercontent.com/101379141/202599948-948b1539-f4af-48cd-b166-b622589b4209.png)
-  
-</details>  
-
-<details><summary> Merge product name of 2 table </summary>
-
-```python
-#Compare the product name of 2 table 
-print(product_name_translation['product_category_name'].nunique())
-print(products['product_category_name'].nunique()) 
-```
-![image](https://user-images.githubusercontent.com/101379141/202600071-0df0c1bc-816a-48df-8eef-aa62d1f147b6.png)
-
-```python
-product_summarize = products.merge(product_name_translation,how ='left', on = 'product_category_name' )  
-```
-  
-</details>  
-
-<details><summary> Check Null values of merged table and Replace Null values </summary>
-  
-```python
-#Check Null values
-product_summarize.isnull().sum()  
-```
-![image](https://user-images.githubusercontent.com/101379141/202600293-a3e49db7-04e0-4845-8eb0-f3ee59b72501.png)
-
-```python
-product_summarize[product_summarize['product_category_name_english'].isnull() == True]  
-```
-![image](https://user-images.githubusercontent.com/101379141/202600383-93313b22-bed2-4d2c-836b-27bf91d69c18.png)
-
-```python
-#Replace Null Value by Unspecified
-
-product_summarize['product_category_name_english'] = product_summarize['product_category_name_english'].fillna(value ='Unspecified')  
-product_summarize.isnull().sum()  
-
-```
-![image](https://user-images.githubusercontent.com/101379141/202600501-2c762e90-fa24-4e68-a958-ca4564de51c6.png)
+![image](https://user-images.githubusercontent.com/101379141/203885166-5c4d9e9a-a5d1-4ded-90a3-1bdf6c224360.png)
     
 </details>  
 
----
-### ✔ Save File 
-
-<details><summary> Code here  </summary>
+<details><summary> K-neighbors </summary>
 
 ```python
-#File customers
-customers.to_csv('/content/drive/MyDrive/Final/De 1/customers_dataset.csv',index=False)
+model = KNeighborsClassifier()
 
-#File orders dataset
-orders.to_csv('/content/drive/MyDrive/Final/De 1/orders_dataset.csv',index=False)
+param_dist = {'n_neighbors': list(range(1,31)),
+              'weights' :['uniform', 'distance']}
 
-#File orders items
-order_items.to_csv('/content/drive/MyDrive/Final/De 1/order_items_dataset.csv',index=False)
-
-#File order payments
-order_payments.to_csv('/content/drive/MyDrive/Final/De 1/order_payments_dataset.csv',index=False)
-
-#File order review
-order_reviews.to_csv('/content/drive/MyDrive/Final/De 1/order_reviews_dataset.csv',index=False)
-
-#Merged file of product & produc_translation 
-product_summarize.to_csv('/content/drive/MyDrive/Final/De 1/product_summarize_dataset.csv',index=False)
-
+RandomSearch(model, param_dist)
+  
 ```
+  
+![image](https://user-images.githubusercontent.com/101379141/203885509-1278e4e7-2c32-4711-abc6-a5409350dd23.png)
+    
+</details>  
+
+<details><summary> Decision-Tree </summary>
+
+```python
+model_2 = DecisionTreeClassifier()
+param_dist = {'max_depth': list(range(3, 9)),
+              "max_features": list(range(1, len(X.columns))),
+              "min_samples_split": list(range(2, 9)),
+              "min_samples_leaf": list(range(1, 9)),
+              "criterion": ["gini", "entropy"]} 
+
+RandomSearch(model_2, param_dist)
+  
+```
+![image](https://user-images.githubusercontent.com/101379141/203885667-8f6fa33c-eb11-45e9-ab9e-9af9f4be8bb9.png)
+
+    
+</details>  
+
+<details><summary> RandomForest </summary>
+
+```python
+model_3 = RandomForestClassifier()
+estimators = [int(x) for x in np.linspace(start = 1, stop = 100, num = 10)]
+param_dist = {'n_estimators' : estimators,
+             'max_depth': list(range(3, 9)),
+              "max_features": list(range(1, len(X.columns))),
+              "min_samples_split": list(range(2, 9)),
+              "min_samples_leaf": list(range(1, 9)),
+              "criterion": ["gini", "entropy"]} 
+RandomSearch(model_3, param_dist)
+  
+```
+![image](https://user-images.githubusercontent.com/101379141/203885729-43fcccce-7916-42ef-b942-dccacee8acc4.png)
+    
+</details>  
+
+<details><summary> AdaBoosting </summary>
+
+```python
+tree = DecisionTreeClassifier(max_depth = 1)
+model = AdaBoostClassifier(base_estimator= tree, n_estimators= 100,random_state = 4)
+model.fit(X_train,y_train)
+y_pred = model.predict(X_test)
+
+EvaluateModel(model, y_test, y_pred, True)  
+```
+![image](https://user-images.githubusercontent.com/101379141/203885879-e7862df9-bf75-44aa-bf3c-2777f796e5bf.png)
+    
+</details>  
+
+<details><summary> Gradient Boosting </summary>
+
+```python
+model = GradientBoostingClassifier(n_estimators =100, max_depth =1,random_state = 5 )
+model.fit(X_train,y_train)
+y_pred = model.predict(X_test)
+
+EvaluateModel(model, y_test, y_pred, True)  
+```
+![image](https://user-images.githubusercontent.com/101379141/203885959-f7d804e2-590d-4250-b646-0945ed671a8f.png)
+
+    
+</details>  
+
+<details><summary> Bagging </summary>
+
+```python
+tree = DecisionTreeClassifier(max_depth = 1)
+model = BaggingClassifier(base_estimator = tree,max_samples=1.0, max_features=1.0, bootstrap_features=False, n_estimators = 100,random_state = 6)
+model.fit(X_train,y_train)
+y_pred = model.predict(X_test)
+
+EvaluateModel(model, y_test, y_pred, True)  
+  
+```
+![image](https://user-images.githubusercontent.com/101379141/203886034-ef6b8887-45dc-4dda-b5ce-ff07af987535.png)
+  
 </details>  
 
 ---
-## 📊 POWER BI
 
-### 1. Transform Data
+### 8️⃣ Success method plot
 
-After import dataset, we need to promote header of columns and change some data type columns. 
+<br>
+We would like to show the summary of models's performance to compare and select the best one.
+</br>
+<br>
 
-<details><summary> Customers dataset  </summary>
+<details><summary> Code here </summary>
 
- - Source (first 10 rows)
-  
-![image](https://user-images.githubusercontent.com/101379141/202607728-04d35ccc-0db2-49b4-97f8-0d6e2cb0c03c.png)
-  
- - Transformed 
-  
- ![image](https://user-images.githubusercontent.com/101379141/202607690-acfd75d9-4359-4af6-85b8-c98c78fac434.png)
+```python
+s = pd.Series(methodDict)
+s = s.sort_values(ascending=False)
+plt.figure(figsize=(12,8))
+
+ax = s.plot(kind='bar') 
+for p in ax.patches:
+  ax.annotate(str(round(p.get_height(),2)), (p.get_x() * 1.005, p.get_height() * 1.005))
+plt.ylim([70.0, 90.0]) 
+plt.xticks(rotation = 45)
+plt.xlabel('Method')
+plt.ylabel('Percentage')
+plt.title('Success of methods')
+     
+plt.show()
+```
+![image](https://user-images.githubusercontent.com/101379141/203886348-2f92aec2-4a2b-45c7-982b-c50c93d845c5.png)
 
 </details>  
 
-<details><summary> Order Items dataset  </summary>
- 
-- Source (first 10 rows)
-  
- ![image](https://user-images.githubusercontent.com/101379141/202607942-2038f7a4-e235-4a46-ac7b-86e2b673b294.png)
-  
-- Transformed
-  
- ![image](https://user-images.githubusercontent.com/101379141/202608029-b7bc5871-cca9-477f-a03b-773566b168aa.png)
-  
-</details>  
+---
+### 9️⃣ Creating predictions on test set
 
+```python
+tree = DecisionTreeClassifier(max_depth = 1)
+model = BaggingClassifier(base_estimator = tree,max_samples=1.0, max_features=1.0, bootstrap_features=False, n_estimators = 100,random_state = 6)
 
-<details><summary> Order Payments dataset  </summary>
+model.fit(X_train, y_train)
+dfTestPredictions = model.predict(X_test)
 
-- Source (First 10 rows)
-  ![image](https://user-images.githubusercontent.com/101379141/202608207-1e51c2b0-5257-458c-8560-acbe82bdc4ec.png)
-  
-- Transformed
-  ![image](https://user-images.githubusercontent.com/101379141/202608270-29d59313-6861-4c00-a2e1-643fc7f92ccd.png)
-</details>  
-
-<details><summary> Order Reviews dataset  </summary>
-
-- Source (First 10 rows)
-![image](https://user-images.githubusercontent.com/101379141/202608439-6de93b9f-57e5-4dde-8baf-46037492f1d8.png)
-
-- Transformed
-![image](https://user-images.githubusercontent.com/101379141/202608488-a2aa5431-19b6-4203-bf35-3515ab38ebdf.png)
-
-</details>  
-
-<details><summary> Orders dataset  </summary>
-
-- Source (First 10 rows)
- ![image](https://user-images.githubusercontent.com/101379141/202608610-952075c6-cc13-4447-af29-f3a0d6ca5d7d.png)
-  
-- Transformed
-  ![image](https://user-images.githubusercontent.com/101379141/202608652-21c233c4-5298-4060-a50b-043992d4cfdd.png)
-
-</details>  
-
-<details><summary> Product Summarize Dataset  </summary>
-  
-- Source (First 10 rows)
-![image](https://user-images.githubusercontent.com/101379141/202608743-b762ec37-e78f-4db7-ba56-fc6e6d2fd238.png)
-
-- Transformed  
-![image](https://user-images.githubusercontent.com/101379141/202608775-130d0dd2-b3ec-4063-9eb1-174b5270b585.png)
-
-</details>  
-
-### 2. Dax, Measure
-
-To support for anlysis chart, We need to create following measure and dax :
-
-<details><summary> 1%star - to filter 1 star review  </summary>
-
+# Write predictions to csv file
+results = pd.DataFrame({'Index': X_test.index, 'predict_Treatment': dfTestPredictions,'test_treatment': y_test})
+# Save to file
+# This file will be visible after publishing in the output section
+results.to_csv('results.csv', index=False)
+print(results)
 ```
-%1star = divide(calculate(count(order_items_dataset[English_name_product]),order_items_dataset[Average_score] = 1),count(order_items_dataset[English_name_product]))
-  
-```  
-</details>  
+![image](https://user-images.githubusercontent.com/101379141/203886834-e1ea68b2-c45a-4a75-9476-500331d374aa.png)
 
-  
-<details><summary> 5%star - to filter 5 star review  </summary>
+---
+### 🔟 Saving model
 
+```python
+from google.colab import drive
+drive.mount('/content/drive')
 ```
-%5star = divide(calculate(count(order_items_dataset[English_name_product]),order_items_dataset[Average_score] = 5),count(order_items_dataset[English_name_product]))
+
+```python
+modeltosave = model
+
+import _pickle as cPickle
+import os
+with open('/content/drive/MyDrive/Mindx_final/DucDat_De1_model.pkl', 'wb') as f:
+    cPickle.dump(modeltosave, f)
+
+print('Saved Model')
 ```
-</details>  
-
-
-<details><summary> %Comment - to calculate % order has comment   </summary>
-
-```
-%Comment = Divide(CALCULATE(count(order_reviews_dataset[Comment]), order_reviews_dataset[Comment] = "Comment"),count(order_reviews_dataset[order_id]))
-```
-</details> 
-
-<details><summary> Average_Score - Average score of orders   </summary>
-
-```
-Average_Score = SUM(order_items_dataset[Average_score])/count(order_items_dataset[order_id])
-```
-</details>
-
-<details><summary> Comment - Count of orders has comment   </summary>
-
-```
-Comment = CALCULATE(count(order_reviews_dataset[Comment]),order_reviews_dataset[Comment] = "Comment")
-```
-</details>
-
-<details><summary> Comment_Star - Calculate review score of orders having comment   </summary>
-
-```
-Comment_Star = calculate(count(order_reviews_dataset[review_score]),order_reviews_dataset[Comment] = "Comment")
-```
-</details>
-
-<details><summary> Total_time_to_delivery average per customer_city   </summary>
-
-```
-Total_time_to_delivery average per customer_city = DIVIDE(sum(orders_dataset[Total_time_to_delivery]),count(orders_dataset[order_id]))
-```
-</details>
-
-<details><summary> Voucher_cat - calculate orders has applied voucher  </summary>
-
-```
-Voucher_cat = Divide(CALCULATE(count(order_payments_dataset[payment_type]),order_payments_dataset[payment_type] = "voucher"),count(order_items_dataset[product_id]))
-```
-</details>
-
-<details><summary> Count Product  </summary>
-
-```
-Count_Product = COUNT(order_items_dataset[English_name_product])
-```
-  
-</details>
-
-<details><summary> Rank Product  </summary>
-
-```
-Rank_Product = RANKX(all(order_items_dataset[English_name_product]),[Count_Product])
-```
-  
-</details>
-
-### 3. Create New Table
-
-To match the average score of order. I have to create new table 
-
-```
-Average = SUMMARIZECOLUMNS(order_reviews_dataset[order_id],"Average_Score",AVERAGE(order_reviews_dataset[review_score]))
-```
-<details><summary> The First Few Rows  </summary>
- 
-![image](https://user-images.githubusercontent.com/101379141/202612783-d8974939-f0b0-43e3-a655-f003e98c0758.png)
-  
-</details>
-
-**Final Model**
-
-<details><summary> Click Here  </summary>
-
-![image](https://user-images.githubusercontent.com/101379141/202614575-3ffb8db6-9e53-42af-8a08-99f5423c4a5e.png)
-
-</details>
