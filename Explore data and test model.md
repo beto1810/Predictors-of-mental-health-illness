@@ -7,7 +7,16 @@
 
 - [🔢 PYTHON - GOOGLE COLAB](#-python---google-colab)
   - [Import Library and dataset](#-import-library-and-dataset)
-  - [Explore, clean & transform data](#-import-library-and-dataset)
+  - [Explore data ](F⃣-explore-data-analysis)
+  - [Preprocessing - Encoding](F⃣--preprocessing---encoding)
+  - [Covariance Matrix](F⃣-covariance-matrix)
+  - [Relationship Charts](F⃣-some-charts-to-see-data-relationship)
+  - [Scaling & Fitting](F⃣-scaling-and-fitting)
+  - [Tuning](F⃣tuning)
+  - [Evaluate Model](F⃣-evaluate-models)
+  - [Success method plt](#8%EF%B8%8F⃣-success-method-plot)
+  - [Creating predictions on test set](#9%EF%B8%8F⃣-creating-predictions-on-test-set)
+  - [Saving model](#-saving-model)
 
 ---
 
