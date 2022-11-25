@@ -87,36 +87,27 @@ First 10 rows
 ---
 ## Explore data and test model
 
-### The Process is following :
+### The Process is following - [Link Here](https://github.com/beto1810/Predictors-of-mental-health-illness/blob/main/Explore%20data%20and%20test%20model.md#1%EF%B8%8F%E2%83%A3-explore-data-analysis) 
 
-- Library and data loading
-- Data cleaning
-- Encoding data
-- Covariance Matrix. Variability comparison between categories of variables
-- Some charts to see data relationship
-- Scaling and fitting
+- Import Library and dataset
+- Explore data
+- Preprocessing - Encoding
+- Covariance Matrix
+- Relationship Charts
+- Scaling & Fitting
 - Tuning
-- Evaluating models
-  - Logistic Regression
-  - KNeighbors Classifier
-  - Decision Tree Classifier
-  - Random Forests
-  - Bagging
-  - Boosting
-  - Stacking
-- Predicting with Neural Network
-- Success method plot
+- Evaluate Model
+- Success method plt
 - Creating predictions on test set
-- Submission
-- Conclusions
-
+- Saving model
 
 ---
 
 # 🧾 What can you practice with this case study?
 - Python
-  - pandas, numpy,matplotlib,seaborn, scpipy
-  - cleaning, check Null values, transforming.
-  - Running model, testing model, function, 
+  - pandas, numpy,matplotlib,seaborn, scpipy.
+  - Cleaning, check Null values, transforming.
+  - Running model,Scaling model, Fiting model, Testing model. 
+  - Loop function, def function.
   - import, save csv file. 
 
