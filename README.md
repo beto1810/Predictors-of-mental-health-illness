@@ -85,7 +85,7 @@ First 10 rows
 </details>
 
 ---
-## Explore data and test model
+## 🔎  Explore data and test model
 
 ### The Process is following - [Link Here](https://github.com/beto1810/Predictors-of-mental-health-illness/blob/main/Explore%20data%20and%20test%20model.md#1%EF%B8%8F%E2%83%A3-explore-data-analysis) 
 
