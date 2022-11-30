@@ -238,12 +238,16 @@ print(df[df["Age"].isin(outliers)] )
 
 ```python
 #Grouping Age
-Age_Group = pd.cut(df['Age'],bins=[17,23,30,61,100],labels=['18-22', '23-30 ','30-60', '> 61'])
+Age_Group = pd.cut(df['Age'],bins=[17,23,30,61,100],labels=['18-22', '23-30 ','31-50', '> 51'])
 df.insert(23,'Age_Group',Age_Group)
 df['Age_Group'].unique()                                                 
 ``` 
 ![image](https://user-images.githubusercontent.com/101379141/203514958-99f8b983-74e6-468b-9add-8bd849857770.png)     
-                                                 
+
+```python
+# Drop Age column, because we create Age grouped                                                 
+df = df.drop(columns='Age')                                                 
+```                                                
 </details> 
   
 <details><summary> 1.3.b Gender Column </summary>  
@@ -333,25 +337,20 @@ for key, value in label_dict.items():
 
 <details><summary> The  Code Here  </summary>
 
- ```python
- #correlation matrix
-corrmat = df.corr()
-f, ax = plt.subplots(figsize=(12, 9))
-sns.heatmap(corrmat, vmax=.8, square=True);
-plt.show()
- ```
-![image](https://user-images.githubusercontent.com/101379141/203692179-340350ea-3d7f-4973-9d12-7afb062831b9.png)
+
 
 ```python
 #treatment correlation matrix
-k = 10 #number of variables for heatmap
+f, ax = plt.subplots(figsize=(12, 9))
+corrmat = df.corr()
+k = 23 #number of variables for heatmap
 cols = corrmat.nlargest(k, 'treatment')['treatment'].index
 cm = np.corrcoef(df[cols].values.T)
 sns.set(font_scale=1.25)
 hm = sns.heatmap(cm, cbar=True, annot=True, square=True, fmt='.2f', annot_kws={'size': 10}, yticklabels=cols.values, xticklabels=cols.values)
-plt.show()  
+plt.show()
 ```
-![image](https://user-images.githubusercontent.com/101379141/203692256-78d617f8-6243-4fe8-8a03-3ea149154f60.png)
+![image](https://user-images.githubusercontent.com/101379141/204680141-6c193cda-3fb5-452f-a057-a2014c3bcbf0.png)
 
   
 </details>
@@ -376,13 +375,13 @@ for ax in g.axes.flat:
     for i,l in enumerate(labels):
         if(i == 0): labels[i] = '18-22'
         elif(i ==1.0):labels[i] = '23-30'
-        elif(i ==2.0):labels[i] = '31-60'
-        elif(i ==3.0):labels[i] = '> 61'  
+        elif(i ==2.0):labels[i] = '31-50'
+        elif(i ==3.0):labels[i] = '> 51'  
     ax.set_xticklabels(labels, rotation=30) # set new labels
 plt.show()
  ```
-![image](https://user-images.githubusercontent.com/101379141/203710998-cf9ac81f-811e-479b-97c3-912937987f7d.png)
- 
+![image](https://user-images.githubusercontent.com/101379141/204680210-9444de57-07e6-4fdf-81de-0daeb2af2991.png)
+  
 </details>
 
 <details><summary> Gender & Treatment  </summary> 
@@ -515,22 +514,7 @@ plt.xlabel('Care Options')
 </details>
 
 ---
-### 5️⃣ Scaling and fitting
-
-<details><summary> Scaling  </summary> 
-<br>  
-We use MinMaxScaler instead of StandardScaler, RobustScaler because those 2 options leading scaling 'Age' to negative values , and this is disadvantage for models.  
-
-```python
-from sklearn.preprocessing import MinMaxScaler 
-
-scaler = MinMaxScaler ()
-df['Age'] = scaler.fit_transform(df[['Age']])
-df.head()
-```
-![image](https://user-images.githubusercontent.com/101379141/203881162-2c2df002-9ad9-4bfd-8c1f-211e9a0540c4.png)
-
-</details>
+### 5️⃣ Fitting
 
 <details><summary> Fitting  </summary> 
 <br>
@@ -651,8 +635,8 @@ print('########### Logistic Regression ###############')
 accuracy_score = EvaluateModel(logreg, y_test, y_pred, plot =True)
       
 ```
-![image](https://user-images.githubusercontent.com/101379141/203885166-5c4d9e9a-a5d1-4ded-90a3-1bdf6c224360.png)
-    
+![image](https://user-images.githubusercontent.com/101379141/204680565-8463ef0e-b56a-4482-9376-f42e169ff415.png)
+  
 </details>  
 
 <details><summary> K-neighbors </summary>
