@@ -514,9 +514,9 @@ plt.xlabel('Care Options')
 </details>
 
 ---
-### 5️⃣ Fitting
+### 5️⃣ Splitting Data
 
-<details><summary> Fitting  </summary> 
+<details><summary> Splitting Dataset  </summary> 
 <br>
  
 ```python
@@ -670,7 +670,15 @@ RandomSearch(model_2, param_dist)
 ```
 ![image](https://user-images.githubusercontent.com/101379141/203885667-8f6fa33c-eb11-45e9-ab9e-9af9f4be8bb9.png)
 
-    
+```python
+import graphviz
+model_2.fit(X_train,y_train)
+dot_data  = tree.export_graphviz(model_2,max_depth = 8,filled = True)
+
+graph = graphviz.Source(dot_data, format="png") 
+graph.render("decision_tree_graphivz")
+  
+```
 </details>  
 
 <details><summary> RandomForest </summary>
@@ -722,15 +730,19 @@ EvaluateModel(model, y_test, y_pred, True)
 <details><summary> Bagging </summary>
 
 ```python
-tree = DecisionTreeClassifier(max_depth = 1)
-model = BaggingClassifier(base_estimator = tree,max_samples=1.0, max_features=1.0, bootstrap_features=False, n_estimators = 100,random_state = 6)
-model.fit(X_train,y_train)
-y_pred = model.predict(X_test)
+tree = DecisionTreeClassifier()
 
-EvaluateModel(model, y_test, y_pred, True)  
+model_4 = BaggingClassifier(base_estimator = tree, bootstrap_features=False, n_estimators = 100,random_state = 2)
+param_dist = {'base_estimator__max_depth' : [1,2,3]}
+
+
+print('########### Bagging ###############')
+
+RandomSearch(model_4, param_dist)
+ 
   
 ```
-![image](https://user-images.githubusercontent.com/101379141/203886034-ef6b8887-45dc-4dda-b5ce-ff07af987535.png)
+![image](https://user-images.githubusercontent.com/101379141/204692826-07b9c034-ea0b-495e-b9e1-9e60144918f2.png)
   
 </details>  
 
@@ -761,16 +773,20 @@ plt.title('Success of methods')
      
 plt.show()
 ```
-![image](https://user-images.githubusercontent.com/101379141/203886348-2f92aec2-4a2b-45c7-982b-c50c93d845c5.png)
-
+![image](https://user-images.githubusercontent.com/101379141/204692652-f5feafd6-d6ac-41d0-b498-bae51a07acd6.png)
+  
 </details>  
 
 ---
 ### 9️⃣ Creating predictions on test set
 
+Because the result showed that Decision Tree, RandomForest,Bagging have the same result. So we can use the decision Tree with best parameters for saving time but still get the best result
+
+<details><summary> Code here </summary>
+
 ```python
-tree = DecisionTreeClassifier(max_depth = 1)
-model = BaggingClassifier(base_estimator = tree,max_samples=1.0, max_features=1.0, bootstrap_features=False, n_estimators = 100,random_state = 6)
+#Because the result showed that Decision Tree, RandomForest,Bagging have the same result. So we can use the decision Tree with best parameters for saving time but still get the best result
+model = DecisionTreeClassifier(min_samples_split= 7, min_samples_leaf= 7, max_features= 17, max_depth = 2, criterion = 'gini')
 
 model.fit(X_train, y_train)
 dfTestPredictions = model.predict(X_test)
@@ -781,8 +797,11 @@ results = pd.DataFrame({'Index': X_test.index, 'predict_Treatment': dfTestPredic
 # This file will be visible after publishing in the output section
 results.to_csv('results.csv', index=False)
 print(results)
+EvaluateModel(model, y_test, y_pred, True)
 ```
-![image](https://user-images.githubusercontent.com/101379141/203886834-e1ea68b2-c45a-4a75-9476-500331d374aa.png)
+![image](https://user-images.githubusercontent.com/101379141/204692504-44f67ca0-103e-4cb7-8fd2-4a75d7fcf424.png)
+  
+</details>  
 
 ---
 ### 🔟 Saving model
